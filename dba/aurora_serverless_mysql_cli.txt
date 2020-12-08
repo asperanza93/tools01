@@ -1,0 +1,25 @@
+aws rds create-db-cluster --db-cluster-identifier sample-cluster --engine aurora --engine-version 5.6.10a \
+--engine-mode serverless --scaling-configuration MinCapacity=4,MaxCapacity=32,SecondsUntilAutoPause=1000,AutoPause=true \
+--master-username username --master-user-password password
+
+aws rds create-db-cluster --db-cluster-identifier sample-cluster --engine aurora-mysql --engine-version 5.7.mysql_aurora.2.07.1 \
+--engine-mode serverless --scaling-configuration MinCapacity=4,MaxCapacity=32,SecondsUntilAutoPause=1000,AutoPause=true \
+--master-username username --master-user-password password
+# parallel query for  5.7 aurora 2.09
+# Aurora MySQL 1.23 or 2.09 and higher:
+$ aws rds modify-db-cluster-parameter-group --db-cluster-parameter-group-name cluster_param_group_name \
+  --parameters ParameterName=aurora_parallel_query,ParameterValue=ON,ApplyMethod=pending-reboot
+{
+    "DBClusterParameterGroupName": "cluster_param_group_name"
+}
+
+# Before Aurora MySQL 1.23:
+$ aws rds modify-db-cluster-parameter-group --db-cluster-parameter-group-name cluster_param_group_name \
+  --parameters ParameterName=aurora_pq,ParameterValue=ON,ApplyMethod=pending-reboot
+{
+    "DBClusterParameterGroupName": "cluster_param_group_name"
+}
+select @@aurora_parallel_query;
+select @@aurora_pq_supported;
+-- same as in oracle with /*no_parallel*/
+show global status; -- to validate a post change config
